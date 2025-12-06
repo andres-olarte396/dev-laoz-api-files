@@ -1,0 +1,132 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "File Versioning & Management API",
+    "version": "1.0.0",
+    "description": "API para administrar archivos, versionarlos y gestionar su ciclo de vida."
+  },
+  "servers": [
+    { "url": "http://localhost:3000" }
+  ],
+  "paths": {
+    "/files": {
+      "post": {
+        "summary": "Subir archivo",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Archivo subido" },
+          "400": { "description": "Solicitud inválida" }
+        }
+      },
+      "get": {
+        "summary": "Listar archivos",
+        "responses": {
+          "200": {
+            "description": "Lista de archivos",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/File" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/{id}": {
+      "get": {
+        "summary": "Descargar archivo",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Archivo descargado" },
+          "404": { "description": "Archivo no encontrado" }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar archivo",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Archivo eliminado" },
+          "404": { "description": "Archivo no encontrado" }
+        }
+      }
+    },
+    "/files/{id}/versions": {
+      "get": {
+        "summary": "Listar versiones",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de versiones",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Version" } }
+              }
+            }
+          },
+          "404": { "description": "Archivo no encontrado" }
+        }
+      }
+    },
+    "/files/{id}/versions/{versionId}": {
+      "get": {
+        "summary": "Descargar versión específica",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "versionId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Versión descargada" },
+          "404": { "description": "Versión no encontrada" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "File": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "originalName": { "type": "string" },
+          "currentVersion": { "type": "integer" },
+          "versions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Version" }
+          },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Version": {
+        "type": "object",
+        "properties": {
+          "version": { "type": "integer" },
+          "filename": { "type": "string" },
+          "path": { "type": "string" },
+          "uploadedAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "info": {
+    "name": "File Versioning & Management API",
+    "description": "Colección de pruebas para la API de administración y versionado de archivos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": { "major": 1, "minor": 0, "patch": 0 }
+  },
+  "item": [
+    {
+      "name": "Flujo principal",
+      "item": [
+        {
+          "name": "01 - Subir archivo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": "{{uploadFilePath}}" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/files", "host": ["{{baseUrl}}"], "path": ["files"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 201', function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.expect(json).to.have.property('id');",
+                  "pm.environment.set('fileId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 - Listar archivos",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/files", "host": ["{{baseUrl}}"], "path": ["files"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {"type":"text/javascript","exec":[
+                "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.expect(Array.isArray(json)).to.be.true;"
+              ]}
+            }
+          ]
+        },
+        {
+          "name": "03 - Descargar archivo (última versión)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/files/{{fileId}}", "host": ["{{baseUrl}}"], "path": ["files","{{fileId}}"] }
+          },
+          "event": [
+            { "listen": "test", "script": {"type":"text/javascript","exec":[
+              "pm.test('status 200 o 404', function () { pm.expect([200,404]).to.include(pm.response.code); });",
+              "// Si 200, debe traer un stream con header de descarga",
+              "if (pm.response.code === 200) { pm.expect(pm.response.headers.has('Content-Disposition')).to.be.true; }"
+            ]}}
+          ]
+        },
+        {
+          "name": "04 - Listar versiones",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/files/{{fileId}}/versions", "host": ["{{baseUrl}}"], "path": ["files","{{fileId}}","versions"] }
+          },
+          "event": [
+            { "listen": "test", "script": {"type":"text/javascript","exec":[
+              "pm.test('status 200 o 404', function () { pm.expect([200,404]).to.include(pm.response.code); });",
+              "if (pm.response.code === 200) { const arr = pm.response.json(); pm.expect(Array.isArray(arr)).to.be.true; if (arr.length>0) { pm.environment.set('versionId', arr[arr.length-1].version); } }"
+            ]}}
+          ]
+        },
+        {
+          "name": "05 - Descargar versión específica",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/files/{{fileId}}/versions/{{versionId}}", "host": ["{{baseUrl}}"], "path": ["files","{{fileId}}","versions","{{versionId}}"] }
+          },
+          "event": [
+            { "listen": "test", "script": {"type":"text/javascript","exec":[
+              "pm.test('status 200 o 404', function () { pm.expect([200,404]).to.include(pm.response.code); });",
+              "if (pm.response.code === 200) { pm.expect(pm.response.headers.has('Content-Disposition')).to.be.true; }"
+            ]}}
+          ]
+        },
+        {
+          "name": "06 - Eliminar archivo",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/files/{{fileId}}", "host": ["{{baseUrl}}"], "path": ["files","{{fileId}}"] }
+          },
+          "event": [
+            { "listen": "test", "script": {"type":"text/javascript","exec":[
+              "pm.test('status 204 o 200 o 404', function () { pm.expect([200,204,404]).to.include(pm.response.code); });"
+            ]}}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Casos negativos",
+      "item": [
+        {
+          "name": "N1 - Subir sin archivo (400)",
+          "request": {
+            "method": "POST",
+            "body": { "mode": "formdata", "formdata": [] },
+            "url": { "raw": "{{baseUrl}}/files", "host": ["{{baseUrl}}"], "path": ["files"] }
+          },
+          "event": [
+            { "listen": "test", "script": {"type":"text/javascript","exec":[
+              "pm.test('status 400', function () { pm.response.to.have.status(400); });"
+            ]}}
+          ]
+        },
+        {
+          "name": "N2 - GET por id inválido (400)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/files/!@#", "host": ["{{baseUrl}}"], "path": ["files","!@#"] }
+          },
+          "event": [
+            { "listen": "test", "script": {"type":"text/javascript","exec":[
+              "pm.test('status 400', function () { pm.response.to.have.status(400); });"
+            ]}}
+          ]
+        },
+        {
+          "name": "N3 - Listar versiones de archivo inexistente (404)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/files/archivo-inexistente/versions", "host": ["{{baseUrl}}"], "path": ["files","archivo-inexistente","versions"] }
+          },
+          "event": [
+            { "listen": "test", "script": {"type":"text/javascript","exec":[
+              "pm.test('status 404', function () { pm.response.to.have.status(404); });"
+            ]}}
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "uploadFilePath", "value": "C:/ruta/a/tu/archivo_de_prueba.txt" },
+    { "key": "fileId", "value": "" },
+    { "key": "versionId", "value": "" }
+  ]
+}
