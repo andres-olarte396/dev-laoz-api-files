@@ -180,6 +180,29 @@ module.exports = {
     res.json(file.versions);
   },
 
+  downloadVersion: async (req, res) => {
+    const { id, versionId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: 'ID inválido' });
+
+    try {
+      const file = await File.findById(id);
+      if (!file || file.deleted) return res.status(404).json({ error: 'Archivo no encontrado' });
+
+      const version = file.versions.find(v => v.version == versionId);
+      if (!version) return res.status(404).json({ error: 'Versión no encontrada' });
+
+      const adapter = storageManager.getAdapter(version.storageType || 'LOCAL');
+      const stream = await adapter.getStream(version.relativePath);
+
+      res.setHeader('Content-Type', version.mimeType || 'application/octet-stream');
+      res.setHeader('Content-Disposition', `attachment; filename="${file.originalName}"`);
+      stream.pipe(res);
+    } catch (err) {
+      console.error('Error al descargar versión:', err);
+      res.status(500).json({ error: 'Error al procesar descarga' });
+    }
+  },
+
   deleteFile: async (req, res) => {
     // Soft delete no borra físico por seguridad inmediata, o sí?
     // Mantenemos soft delete
