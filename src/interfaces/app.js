@@ -2,7 +2,11 @@ const express = require('express');
 const filesRouter = require('./routes/files.routes');
 
 const app = express();
+const path = require('path');
 app.use(express.json());
+
+// Serve static micro-frontend
+app.use('/ui', express.static(path.join(__dirname, '../../public')));
 
 app.use('/api/files', filesRouter);
 // Swagger docs if available
