@@ -7,6 +7,8 @@ class StorageManager {
         // Se podría cargar config de .env para tener varios named adapters
         const defaultPath = process.env.STORAGE_PATH || 'uploads';
         this.registerAdapter('LOCAL', new LocalStorageAdapter(defaultPath));
+        // Adapter for Source Code Editing (Source of Truth)
+        this.registerAdapter('REPOS', new LocalStorageAdapter('e:/MyRepos'));
     }
 
     registerAdapter(name, adapter) {

@@ -12,6 +12,37 @@ const makeStoredName = (orig) => {
 
 module.exports = {
   uploadFile: async (req, res) => {
+    // ... impl existing ...
+    if (!req.file) {
+      return res.status(400).json({ error: 'No se adjuntó ningún archivo' });
+    }
+    // ... (omitted for brevity in replacement, but wait, replace_file_content needs exact target.
+    // I will append saveContent BEFORE uploadFile for easier targeting or use a new method to APPEND?
+    // replace_file_content works by replacing a block.
+    // I will replace `module.exports = {` with `module.exports = { saveContent: ...,`
+    // No, that's messy. I will insert it at the beginning of the object.
+  },
+
+  // Nueva función para guardar contenido de texto directamente (Editor)
+  saveContent: async (req, res) => {
+    const { path: relativePath, content, storageType = 'REPOS' } = req.body;
+
+    if (!relativePath || content === undefined) {
+      return res.status(400).json({ error: 'Path and content are required' });
+    }
+
+    try {
+      const adapter = storageManager.getAdapter(storageType);
+      // Save directly overwrites in LocalStorageAdapter
+      await adapter.save(relativePath, content);
+      res.json({ message: 'Contenido guardado exitosamente', path: relativePath });
+    } catch (err) {
+      console.error('Error saving content:', err);
+      res.status(500).json({ error: err.message });
+    }
+  },
+
+  uploadFile: async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: 'No se adjuntó ningún archivo' });
     }

@@ -6,6 +6,10 @@ const upload = multer();
 // Controladores (a implementar)
 const filesController = require('../controllers/files.controller');
 
+// Ruta para guardar contenido de texto (Editor)
+console.log('Registering /content route');
+router.post('/content', filesController.saveContent);
+
 router.post('/', upload.single('file'), filesController.uploadFile);
 router.get('/:id', filesController.downloadFile);
 router.get('/:id/versions', filesController.listVersions);
