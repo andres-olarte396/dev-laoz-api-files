@@ -31,8 +31,8 @@ Este proyecto es una API RESTful construida con Node.js que permite administrar 
 
 ```bash
 # Clonar el repositorio
-git clone <repo-url>
-cd <nombre-del-proyecto>
+git clone https://github.com/andres-olarte396/dev-laoz-api-files
+cd dev-laoz-api-files
 
 # Instalar dependencias
 npm install
@@ -47,12 +47,28 @@ prod: npm start
 
 ## Endpoints principales
 
-- `POST /files` — Subir archivo
+- `POST /files` o `/api/files` — Subir archivo
 - `GET /files` — Listar archivos
 - `GET /files/:id` — Descargar archivo
 - `GET /files/:id/versions` — Listar versiones
 - `GET /files/:id/versions/:versionId` — Descargar versión específica
 - `DELETE /files/:id` — Eliminar archivo
+
+## Integración y pruebas rápidas
+
+Este servicio se integra a través del API Gateway (`dev-laoz-api-gateway`). Puedes probarlo desde el proyecto `dev-laoz-server-dev-web-tools` usando:
+
+- `test-files.js` (Node): subida, versiones y movimiento
+- `test-files-api.ps1` (PowerShell): subida y verificación de movimiento
+
+## Docker
+
+Servicio listo para ejecutarse mediante `docker-compose.yml` del proyecto `dev-laoz-server-dev-web-tools`.
+
+Variables típicas:
+- `PORT`: 3700
+- `MONGO_URI`: `mongodb://mongodb:27017/files`
+- `STORAGE_PATH`: `/app/uploads`
 
 ## Principios aplicados
 
