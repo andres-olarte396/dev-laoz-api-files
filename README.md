@@ -66,6 +66,7 @@ Este servicio se integra a través del API Gateway (`dev-laoz-api-gateway`). Pue
 Servicio listo para ejecutarse mediante `docker-compose.yml` del proyecto `dev-laoz-server-dev-web-tools`.
 
 Variables típicas:
+
 - `PORT`: 3700
 - `MONGO_URI`: `mongodb://mongodb:27017/files`
 - `STORAGE_PATH`: `/app/uploads`
